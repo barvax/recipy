@@ -1,136 +1,107 @@
-function createTable() {
-    var columnCount = document.getElementById("columnInput").value;
-    var table = document.getElementById("myTable");
-    table.innerHTML = '';
+console.log(chemicalSolvents);
+myData = [
+];
+const main = document.getElementById('main');
+const dropdown = document.getElementById('solventDropdown');
+const popup = document.getElementById('solventPopup');
+const detailsDiv = document.getElementById('solventDetails');
+const closeButton = document.getElementById('closeButton');
+const addButton = document.getElementById('addButton');
+let currentMaterial;
+// Create options for each solvent
+chemicalSolvents.forEach(solvent => {
+  const option = document.createElement('option');
+  option.value = solvent.name;
+  option.textContent = solvent.name;
+  dropdown.appendChild(option);
+});
 
-    var thead = document.createElement('thead');
-    var tbody = document.createElement('tbody');
+// Event listener to handle selection
+dropdown.addEventListener('change', function() {
+  const selectedSolvent = chemicalSolvents.find(solvent => solvent.name === this.value);
+  if (selectedSolvent) {
+    console.log(selectedSolvent);
+    detailsDiv.innerHTML = `
+    <p>Name: ${selectedSolvent.name}</p>
+    <p>Formula: ${selectedSolvent.formula}</p>
+    <p>Molar Mass: ${selectedSolvent.molarMass}</p>
+    <p>Density: ${selectedSolvent.density}</p>
+    <p>Boiling Point: ${selectedSolvent.boilingPoint}</p>
+    <p>Melting Point: ${selectedSolvent.meltingPoint}</p>
+  `;
+  currentMaterial = selectedSolvent;
+  // Display the popup
+  popup.style.display = 'block';
+    this.value = '';
+  }
+});
 
-    var headerRow = document.createElement('tr');
+closeButton.addEventListener('click', function() {
+    // Hide the popup
+    popup.style.display = 'none';
+  });
+  
+  // Event listener for the add button
+  addButton.addEventListener('click', function() {
+    // Perform desired action when the add button is clicked
+  
+    myData.push({name:currentMaterial.name,text:""});
+    console.log(myData);
+    popup.style.display = 'none'
+    updateMainData();
+  
+  });
 
-    var th = document.createElement('th');
-    th.textContent = 'Material';
-    headerRow.appendChild(th);
-
-    for (var i = 2; i <= columnCount; i++) {
-      var th = document.createElement('th');
-      var input = document.createElement('input');
+  function updateMainData() {
+    main.innerHTML = '';
+    for (let i = 0; i < myData.length; i++) {
+      const name = myData[i].name;
+      const text = myData[i].text;
+      const h4 = document.createElement('h4');
+      const input = document.createElement('input');
+      const addButton = document.createElement('button');
+      const h5 = document.createElement('h5');
+      const hr = document.createElement('hr');
+  
+      h4.textContent = name;
       input.type = 'text';
-      input.placeholder = 'Column ' + i;
-      th.appendChild(input);
-      th.setAttribute('data-value', 'column' + i);
-      headerRow.appendChild(th);
-    }
-    thead.appendChild(headerRow);
-
-    table.appendChild(thead);
-    table.appendChild(tbody);
-
-    // Enable drag and drop for the table columns
-    enableDragAndDrop();
-  }
-
-  function addRow() {
-    var table = document.getElementById("myTable");
-    var tbody = table.querySelector('tbody');
-
-    var row = document.createElement('tr');
-
-    var columnCount = table.rows[0].cells.length;
-
-    for (var i = 0; i < columnCount; i++) {
-      var cell = document.createElement('td');
-      var input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Row ' + (table.rows.length + 1) + ', Column ' + (i + 1);
-      cell.appendChild(input);
-      row.appendChild(cell);
-    }
-
-    tbody.appendChild(row);
-  }
-
-  function enableDragAndDrop() {
-    var headers = document.querySelectorAll("#myTable th");
-    [].forEach.call(headers, function(header) {
-      header.draggable = true;
-
-      header.addEventListener('dragstart', handleDragStart, false);
-      header.addEventListener('dragover', handleDragOver, false);
-      header.addEventListener('dragenter', handleDragEnter, false);
-      header.addEventListener('dragleave', handleDragLeave, false);
-      header.addEventListener('drop', handleDrop, false);
-      header.addEventListener('dragend', handleDragEnd, false);
-    });
-  }
-
-  var dragSrcElement = null;
-
-  function handleDragStart(e) {
-    dragSrcElement = this;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', this.getAttribute('data-value'));
-  }
-
-  function handleDragOver(e) {
-    if (e.preventDefault) {
-      e.preventDefault();
-    }
-    e.dataTransfer.dropEffect = 'move';
-    return false;
-  }
-
-  function handleDragEnter(e) {
-    this.classList.add('over');
-  }
-
-  function handleDragLeave(e) {
-    this.classList.remove('over');
-  }
-
-  function handleDrop(e) {
-    if (e.stopPropagation) {
-      e.stopPropagation();
-    }
-    if (dragSrcElement !== this) {
-      var srcValue = e.dataTransfer.getData('text/plain');
-      var destValue = this.getAttribute('data-value');
-      swapColumns(srcValue, destValue);
-      enableDragAndDrop(); // Re-enable drag and drop after swapping columns
-    }
-    return false;
-  }
-
-  function handleDragEnd(e) {
-    var headers = document.querySelectorAll('#myTable th');
-    [].forEach.call(headers, function(header) {
-      header.classList.remove('over');
-    });
-  }
-
-  function swapColumns(srcValue, destValue) {
-    var table = document.getElementById('myTable');
-    var rows = table.rows;
-
-    var srcIndex = -1;
-    var destIndex = -1;
-
-    // Find the source and destination column indices
-    for (var i = 0; i < rows[0].cells.length; i++) {
-      if (rows[0].cells[i].getAttribute('data-value') === srcValue) {
-        srcIndex = i;
-      } else if (rows[0].cells[i].getAttribute('data-value') === destValue) {
-        destIndex = i;
-      }
+      input.value = myData[i].text;
+      addButton.textContent = 'Add';
+      h5.textContent = text;
+  
+      addButton.addEventListener('click', function() {
+        const inputValue = input.value;
+        console.log(`Value entered for ${name}: ${inputValue}`);
+      myData[i].text = inputValue;
+        
+        console.log(myData[i]);
+        if(addButton.style.display==""){
+            h5.innerHTML=inputValue;
+            input.style.display='none';
+            addButton.style.display="none"
+            console.log(addButton.style.display);
+        }else{
+          console.log(addButton.style.display);
+        }
+       
+      });
+      h5.addEventListener('click', function() {
+    
+        h5.innerHTML="";
+        input.style.display='block';
+        addButton.style.display=""
+        input.value = myData[i].text;
+        console.log(myData[i]);
+      });
+  
+      main.appendChild(h4);
+      main.appendChild(input);
+     
+      main.appendChild(h5);
+      main.appendChild(addButton);
+      main.appendChild(hr);
     }
 
-    if (srcIndex !== -1 && destIndex !== -1) {
-      for (var j = 0; j < rows.length; j++) {
-        var srcCell = rows[j].cells[srcIndex].cloneNode(true);
-        var destCell = rows[j].cells[destIndex].cloneNode(true);
-
-        rows[j].replaceChild(destCell, rows[j].cells[srcIndex]);
-        rows[j].replaceChild(srcCell, rows[j].cells[destIndex]);
-      }
-    }
+    
   }
+  
