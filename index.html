@@ -33,9 +33,7 @@
   <input type="number" id="columnInput">
   <button onclick="createTable()">Create Table</button>
 
-  <table id="myTable"></table>
-
-  <button id="addRowButton" onclick="openPopup()" style="display: none;">Add Row</button>
+  <div id="tablesContainer"></div>
 
   <div id="popupContainer" class="popup-container" style="display: none;">
     <div class="popup">
@@ -60,10 +58,18 @@
       { name: 'Material 3', color: 'Green', price: '$20' },
     ];
 
+    var tableCount = 0;
+
     function createTable() {
       var columnCount = document.getElementById("columnInput").value;
-      var table = document.getElementById("myTable");
-      table.innerHTML = '';
+
+      var table = document.createElement('table');
+      table.id = "myTable_" + tableCount;
+
+      var tableContainer = document.createElement('div');
+      tableContainer.appendChild(table);
+
+      var columnInput = document.getElementById("columnInput");
 
       var thead = document.createElement('thead');
       var tbody = document.createElement('tbody');
@@ -89,14 +95,21 @@
       table.appendChild(tbody);
 
       // Enable drag and drop for the table columns
-      enableDragAndDrop();
+      enableDragAndDrop(table);
 
       // Show the "Add Row" button
-      var addRowButton = document.getElementById("addRowButton");
-      addRowButton.style.display = "block";
+      var addButton = document.createElement('button');
+      addButton.textContent = "Add Row";
+      addButton.onclick = function() { openPopup(table.id); };
+      tableContainer.appendChild(addButton);
+
+      var tablesContainer = document.getElementById("tablesContainer");
+      tablesContainer.appendChild(tableContainer);
+
+      tableCount++;
     }
 
-    function openPopup() {
+    function openPopup(tableId) {
       var popupContainer = document.getElementById("popupContainer");
       popupContainer.style.display = "flex";
 
@@ -104,6 +117,7 @@
       var materialDropdown = document.getElementById("materialDropdown");
       materialDropdown.innerHTML = "";
       populateMaterialDropdown(materialDropdown);
+      materialDropdown.setAttribute("data-table", tableId);
     }
 
     function closePopup() {
@@ -114,20 +128,21 @@
     function addRowFromPopup() {
       var materialDropdown = document.getElementById("materialDropdown");
       var selectedMaterial = materialDropdown.value;
+      var tableId = materialDropdown.getAttribute("data-table");
 
       if (selectedMaterial) {
-        addRow(selectedMaterial);
+        addRow(tableId, selectedMaterial);
         closePopup();
       }
     }
 
-    function addRow(selectedMaterial) {
-      var table = document.getElementById("myTable");
+    function addRow(tableId, selectedMaterial) {
+      var table = document.getElementById(tableId);
       var tbody = table.querySelector('tbody');
 
       var row = document.createElement('tr');
 
-      var columnCount = table.rows[0].cells.length;
+      var columnCount = document.getElementById("columnInput").value;
 
       // Create the first cell with the material name
       var materialCell = document.createElement('td');
@@ -157,17 +172,99 @@
       }
     }
 
-    function enableDragAndDrop() {
-      // ...
+    function enableDragAndDrop(table) {
+      var columns = table.querySelectorAll('th[data-value]');
+
+      columns.forEach(function(column) {
+        column.draggable = true;
+        column.addEventListener('dragstart', handleDragStart, false);
+        column.addEventListener('dragenter', handleDragEnter, false);
+        column.addEventListener('dragover', handleDragOver, false);
+        column.addEventListener('dragleave', handleDragLeave, false);
+        column.addEventListener('drop', handleDrop, false);
+        column.addEventListener('dragend', handleDragEnd, false);
+      });
     }
 
     var dragSrcElement = null;
 
-    // ...
+    function handleDragStart(e) {
+      dragSrcElement = this;
 
-    function swapColumns(srcValue, destValue) {
-      // ...
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', this.innerHTML);
+
+      this.classList.add('dragging');
     }
+
+    function handleDragOver(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+
+      e.dataTransfer.dropEffect = 'move';
+
+      return false;
+    }
+
+    function handleDragEnter(e) {
+      this.classList.add('over');
+    }
+
+    function handleDragLeave(e) {
+      this.classList.remove('over');
+    }
+
+    function handleDrop(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+
+      if (dragSrcElement !== this) {
+        swapColumns(dragSrcElement, this);
+      }
+
+      return false;
+    }
+
+    function handleDragEnd(e) {
+      this.classList.remove('dragging');
+      var columns = document.querySelectorAll('th');
+      columns.forEach(function(column) {
+        column.classList.remove('over');
+      });
+    }
+
+    function swapColumns(srcColumn, destColumn) {
+  var srcIndex = srcColumn.cellIndex;
+  var destIndex = destColumn.cellIndex;
+
+  var table = srcColumn.closest('table');
+  var rows = table.rows;
+
+  for (var i = 0; i < rows.length; i++) {
+    var srcCell = rows[i].cells[srcIndex];
+    var destCell = rows[i].cells[destIndex];
+
+    var srcInput = srcCell.querySelector('input');
+    var destInput = destCell.querySelector('input');
+
+    var srcValue = srcInput.value;
+    var destValue = destInput.value;
+
+    srcInput.value = destValue;
+    destInput.value = srcValue;
+
+    // Swap the data values of the cells
+    var srcDataValue = srcCell.getAttribute('data-value');
+    var destDataValue = destCell.getAttribute('data-value');
+    srcCell.setAttribute('data-value', destDataValue);
+    destCell.setAttribute('data-value', srcDataValue);
+  }
+}
+
+
+
 
     function openDetailsPopup(material) {
       var detailsPopupContainer = document.getElementById("detailsPopupContainer");
@@ -184,13 +281,9 @@
 
     // Wait for the document to load
     document.addEventListener("DOMContentLoaded", function() {
-      // Hide the "Add Row" button initially
-      var addRowButton = document.getElementById("addRowButton");
-      addRowButton.style.display = "none";
-
       // Add event listener for cell click
-      var table = document.getElementById("myTable");
-      table.addEventListener("click", function(event) {
+      var tablesContainer = document.getElementById("tablesContainer");
+      tablesContainer.addEventListener("click", function(event) {
         var cell = event.target;
         if (cell.tagName === "TD" && cell.hasAttribute("data-material")) {
           var material = cell.getAttribute("data-material");
