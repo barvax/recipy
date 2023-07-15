@@ -2,11 +2,11 @@
 <html>
   <head>
     <title>App</title>
-   
     <link rel="stylesheet" type="text/css" href="styles.css">
   </head>
   <body>
     <h2>Select a Chemical Solvent:</h2>
+    <button id="Add-segment">Add segment</button>
     <select id="solventDropdown">
       <option value="">-- Select Solvent --</option>
     </select>
@@ -18,9 +18,16 @@
     </div>
 
     <div id="main"></div>
+    <div id="segmentPopup" class="popup">
+      <h2 id="segmentTitle"></h2>
+      <input type="text" id="segmentInput" class="large-input">
+      <button id="segmentCloseButton">Close</button>
+      <button id="segmentAddButton">Add</button>
+    </div>
+    <div id="mainData"></div>
+    
     <script src="data.js"></script>
     <script src="materials.js"></script>
     <script src="script.js"></script>
-   
   </body>
 </html>
