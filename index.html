@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid black;
+      padding: 5px;
+    }
+    .popup-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .popup {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <label for="columnInput">Number of columns:</label>
+  <input type="number" id="columnInput">
+  <button onclick="createTable()">Create Table</button>
+
+  <table id="myTable"></table>
+
+  <button id="addRowButton" onclick="openPopup()" style="display: none;">Add Row</button>
+
+  <div id="popupContainer" class="popup-container" style="display: none;">
+    <div class="popup">
+      <h3>Select Material:</h3>
+      <select id="materialDropdown"></select>
+      <button onclick="addRowFromPopup()">Add Row</button>
+    </div>
+  </div>
+
+  <div id="detailsPopupContainer" class="popup-container" style="display: none;">
+    <div class="popup">
+      <h3>Material Details:</h3>
+      <p id="materialDetails"></p>
+      <button onclick="closeDetailsPopup()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    var materials = [
+      { name: 'Material 1', color: 'Red', price: '$10' },
+      { name: 'Material 2', color: 'Blue', price: '$15' },
+      { name: 'Material 3', color: 'Green', price: '$20' },
+    ];
+
+    function createTable() {
+      var columnCount = document.getElementById("columnInput").value;
+      var table = document.getElementById("myTable");
+      table.innerHTML = '';
+
+      var thead = document.createElement('thead');
+      var tbody = document.createElement('tbody');
+
+      var headerRow = document.createElement('tr');
+
+      var th = document.createElement('th');
+      th.textContent = 'Material';
+      headerRow.appendChild(th);
+
+      for (var i = 2; i <= columnCount; i++) {
+        var th = document.createElement('th');
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Column ' + i;
+        th.appendChild(input);
+        th.setAttribute('data-value', 'column' + i);
+        headerRow.appendChild(th);
+      }
+      thead.appendChild(headerRow);
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+
+      // Enable drag and drop for the table columns
+      enableDragAndDrop();
+
+      // Show the "Add Row" button
+      var addRowButton = document.getElementById("addRowButton");
+      addRowButton.style.display = "block";
+    }
+
+    function openPopup() {
+      var popupContainer = document.getElementById("popupContainer");
+      popupContainer.style.display = "flex";
+
+      // Populate the material dropdown in the popup
+      var materialDropdown = document.getElementById("materialDropdown");
+      materialDropdown.innerHTML = "";
+      populateMaterialDropdown(materialDropdown);
+    }
+
+    function closePopup() {
+      var popupContainer = document.getElementById("popupContainer");
+      popupContainer.style.display = "none";
+    }
+
+    function addRowFromPopup() {
+      var materialDropdown = document.getElementById("materialDropdown");
+      var selectedMaterial = materialDropdown.value;
+
+      if (selectedMaterial) {
+        addRow(selectedMaterial);
+        closePopup();
+      }
+    }
+
+    function addRow(selectedMaterial) {
+      var table = document.getElementById("myTable");
+      var tbody = table.querySelector('tbody');
+
+      var row = document.createElement('tr');
+
+      var columnCount = table.rows[0].cells.length;
+
+      // Create the first cell with the material name
+      var materialCell = document.createElement('td');
+      materialCell.textContent = selectedMaterial;
+      materialCell.setAttribute('data-material', selectedMaterial);
+      row.appendChild(materialCell);
+
+      // Create the remaining cells with input fields
+      for (var i = 1; i < columnCount; i++) {
+        var cell = document.createElement('td');
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Row ' + (table.rows.length + 1) + ', Column ' + (i + 1);
+        cell.appendChild(input);
+        row.appendChild(cell);
+      }
+
+      tbody.appendChild(row);
+    }
+
+    function populateMaterialDropdown(select) {
+      for (var i = 0; i < materials.length; i++) {
+        var option = document.createElement('option');
+        option.value = materials[i].name;
+        option.textContent = materials[i].name;
+        select.appendChild(option);
+      }
+    }
+
+    function enableDragAndDrop() {
+      // ...
+    }
+
+    var dragSrcElement = null;
+
+    // ...
+
+    function swapColumns(srcValue, destValue) {
+      // ...
+    }
+
+    function openDetailsPopup(material) {
+      var detailsPopupContainer = document.getElementById("detailsPopupContainer");
+      detailsPopupContainer.style.display = "flex";
+
+      var materialDetails = document.getElementById("materialDetails");
+      materialDetails.textContent = JSON.stringify(material);
+    }
+
+    function closeDetailsPopup() {
+      var detailsPopupContainer = document.getElementById("detailsPopupContainer");
+      detailsPopupContainer.style.display = "none";
+    }
+
+    // Wait for the document to load
+    document.addEventListener("DOMContentLoaded", function() {
+      // Hide the "Add Row" button initially
+      var addRowButton = document.getElementById("addRowButton");
+      addRowButton.style.display = "none";
+
+      // Add event listener for cell click
+      var table = document.getElementById("myTable");
+      table.addEventListener("click", function(event) {
+        var cell = event.target;
+        if (cell.tagName === "TD" && cell.hasAttribute("data-material")) {
+          var material = cell.getAttribute("data-material");
+          openDetailsPopup(material);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
