@@ -6,9 +6,10 @@ const detailsDiv = document.getElementById('solventDetails');
 const closeButton = document.getElementById('closeButton');
 const addButton = document.getElementById('addButton');
 let currentMaterial;
-
+const mainData = document.getElementById('mainData');
 // Array to store the added data
 const myData = [];
+const segments=[];
 
 // Create options for each solvent
 chemicalSolvents.forEach(solvent => {
@@ -35,6 +36,7 @@ dropdown.addEventListener('change', function() {
     // Display the popup
     popup.style.display = 'block';
     this.value = '';
+    console.log("here!")
     updateMainData();
   }
 });
@@ -54,58 +56,91 @@ addButton.addEventListener('click', function() {
 });
 
 function updateMainData() {
-  main.innerHTML = '';
-
-  // Create the table element
-  const table = document.createElement('table');
-  table.border = '1';
-
-  // Create the table header row
-  const headerRow = document.createElement('tr');
-
-  // Create the header cell for the Material column
-  const materialHeader = document.createElement('th');
-  materialHeader.textContent = 'Material';
-  headerRow.appendChild(materialHeader);
-
-  // Create the remaining header cells
-  for (let i = 1; i <= 9; i++) {
-    const headerCell = document.createElement('th');
-    headerCell.textContent = `Column ${i}`;
-    headerRow.appendChild(headerCell);
-  }
-
-  // Append the header row to the table
-  table.appendChild(headerRow);
-
-  // Create a row for each material in myData
-  myData.forEach(material => {
-    // Create a new row
-    const row = document.createElement('tr');
-
-    // Create the first cell with the material name
-    const materialCell = document.createElement('td');
-    materialCell.textContent = material.name;
-    row.appendChild(materialCell);
-
-    // Create the remaining cells with input fields
+    main.innerHTML = '';
+  
+    // Create the table element
+    const table = document.createElement('table');
+    table.border = '1';
+  
+    // Create the table header row
+    const headerRow = document.createElement('tr');
+  
+    // Create the header cell for the Material column
+    const materialHeader = document.createElement('th');
+    materialHeader.textContent = 'Material';
+    headerRow.appendChild(materialHeader);
+  
+    // Create the remaining header cells
     for (let i = 1; i <= 9; i++) {
-      const inputCell = document.createElement('td');
-      const inputField = document.createElement('input');
-      inputField.type = 'text';
-      inputField.value = material.text;
-      inputCell.appendChild(inputField);
-      row.appendChild(inputCell);
+      const headerCell = document.createElement('th');
+      headerCell.textContent = `Column ${i}`;
+      headerRow.appendChild(headerCell);
     }
+  
+    // Append the header row to the table
+    table.appendChild(headerRow);
+  
+    // Create a row for each material in myData
+    myData.forEach(material => {
+      // Create a new row
+      const row = document.createElement('tr');
+  
+      // Create the first cell with the material name
+      const materialCell = document.createElement('td');
+      materialCell.textContent = material.name;
+      row.appendChild(materialCell);
+  
+      // Create the remaining cells with input fields
+      for (let i = 1; i <= 9; i++) {
+        const inputCell = document.createElement('td');
+        const inputField = document.createElement('input');
+        inputField.type = 'text';
+  
+        // Find the segment with the corresponding index (i-1)
+        const segment = main.querySelector(`div:nth-child(${i}) h3`);
+  
+        if (segment) {
+          // If the segment exists, set the input field value to its text content
+          inputField.value = segment.textContent;
+        } else {
+          // If the segment doesn't exist, set the input field value to an empty string
+          inputField.value = '';
+        }
+  
+        inputCell.appendChild(inputField);
+        row.appendChild(inputCell);
+      }
+  
+      // Append the row to the table
+      table.appendChild(row);
+    });
+  
+    // Append the table to the main section
+    main.appendChild(table);
+    // mainData.innerHTML='';
+  
+    // for (let i = 0; i < segments.length; i++) {
+        
+    //     mainData.innerHTML+=`<h3>${segments[i].segmentNum}</h3>
+    //     <p>${segments[i].data}</p>
+    //     `
+        
+    // }
+  }
+  
+//   mainData.addEventListener('click', function(event) {
+//     const target = event.target;
+//     if (target.tagName === 'H3') {
+//       const segmentNum = target.textContent;
+//       // Perform desired action when the h3 element is clicked
+//       console.log(`Clicked on segment ${segmentNum}`);
+//       segmentPopup.style.display = 'block';
+//     //   segmentTitle.textContent = segmentTitleHeading.textContent.replace('Segment ', '');
+//     //   segmentInput.value = segmentText.textContent;
 
-    // Append the row to the table
-    table.appendChild(row);
-  });
-
-  // Append the table to the main section
-  main.appendChild(table);
-}
-const mainData = document.getElementById('mainData');
+//     //   selectedSegment = segmentDiv;
+//     }
+//   });
 const segmentButton = document.getElementById('Add-segment');
 const segmentPopup = document.getElementById('segmentPopup');
 const segmentTitle = document.getElementById('segmentTitle');
@@ -145,13 +180,18 @@ segmentAddButton.addEventListener('click', function() {
     const segmentText = document.createElement('p');
 
     // Set the segment title and text content
-    segmentTitleHeading.textContent = `Segment ${main.children.length}`;
+    segmentTitleHeading.textContent = `Segment ${mainData.children.length+1}`;
     segmentText.textContent = segmentValue;
 
     // Append the elements to the segment div
     segmentDiv.appendChild(segmentTitleHeading);
     segmentDiv.appendChild(segmentText);
 
+    segments.push({
+        segmentNum:`Segment ${mainData.children.length}`,
+        data:segmentValue
+    
+    })
     // Add click event listener to segment title
     segmentTitleHeading.addEventListener('click', function() {
       segmentPopup.style.display = 'block';
@@ -162,7 +202,7 @@ segmentAddButton.addEventListener('click', function() {
     });
 
     // Append the segment div to the main section
-    main.appendChild(segmentDiv);
+    mainData.appendChild(segmentDiv);
   }
 
   // Clear the input field
